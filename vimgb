@@ -1,7 +1,3 @@
-" This is Gary Bernhardt's .vimrc file
-"
-" Be warned: this has grown slowly over years and may not be internally
-" consistent.
 
 call pathogen#runtime_append_all_bundles()
 
