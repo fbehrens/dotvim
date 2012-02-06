@@ -1,4 +1,4 @@
-
+echo "hallo"
 call pathogen#runtime_append_all_bundles()
 
 " When started as "evim", evim.vim will already have done these settings.
@@ -28,7 +28,7 @@ set smartcase
 set scrolloff=3
 
 " Store temporary files in a central spot
-set backupdir=~/.vim-tmp,c:\temp\vim
+set backupdir=~/.vim-tmp
 set directory=~/.vim-tmp,c:\temp\vim
 
 " allow backspacing over everything in insert mode
@@ -143,7 +143,7 @@ endif
 " GRB: set the color scheme
 :set t_Co=256 " 256 colors
 :set background=light
-:color solarized
+:color morning
 
 " GRB: hide the toolbar in GUI mode
 if has("gui_running")
