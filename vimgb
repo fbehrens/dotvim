@@ -1,4 +1,3 @@
-echo "hallo"
 call pathogen#runtime_append_all_bundles()
 
 " When started as "evim", evim.vim will already have done these settings.
@@ -137,7 +136,7 @@ if has("gui_running")
   :set columns=171
 
   " GRB: highlight current line"
-  :set cursorline
+  ":set cursorline
 endif
 
 " GRB: set the color scheme
@@ -308,7 +307,7 @@ let mapleader=","
 " nnoremap <leader>t :call JumpToTestsForClass()<cr>
 
 " highlight current line
-set cursorline
+" set cursorline
 
 set cmdheight=2
 
