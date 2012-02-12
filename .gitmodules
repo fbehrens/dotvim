@@ -22,3 +22,6 @@
 [submodule "bundle/graphviz"]
 	path = bundle/graphviz
 	url = https://github.com/wannesm/wmgraphviz.vim.git
+[submodule "bundle/vim-coffee-script"]
+	path = bundle/vim-coffee-script
+	url = git://github.com/kchmck/vim-coffee-script.git
