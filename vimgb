@@ -416,7 +416,7 @@ nnoremap <leader>ri :call InlineVariable()<cr>
 command! KillWhitespace :normal :%s/ *$//g<cr><c-o><cr>
 
 " Always show tab bar
-set showtabline=2
+" set showtabline=2
 
 augroup mkd
     autocmd BufRead *.mkd  set ai formatoptions=tcroqn2 comments=n:&gt;
