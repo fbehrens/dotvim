@@ -1,5 +1,13 @@
 call pathogen#runtime_append_all_bundles()
 
+" from https://wincent.com/blog/tweaking-command-t-and-vim-for-use-in-the-terminal-and-tmux
+set ttimeoutlen=50
+if &term =~ "xterm" || &term =~ "screen"
+  let g:CommandTCancelMap     = ['<ESC>', '<C-c>']
+  let g:CommandTSelectNextMap = ['<C-n>', '<C-j>', '<ESC>OB']
+  let g:CommandTSelectPrevMap = ['<C-p>', '<C-k>', '<ESC>OA']
+endif
+
 " When started as "evim", evim.vim will already have done these settings.
 if v:progname =~? "evim"
   finish
@@ -309,7 +317,7 @@ let mapleader=","
 " highlight current line
 " set cursorline
 
-set cmdheight=2
+" set cmdheight=2
 
 " Don't show scroll bars in the GUI
 set guioptions-=L
@@ -330,7 +338,7 @@ set switchbuf=useopen
 
 " autocmd BufRead,BufNewFile *.html source ~/.vim/indent/html_grb.vim
 " autocmd FileType htmldjango source ~/.vim/indent/html_grb.vim
-autocmd! BufRead,BufNewFile *.sass setfiletype sass 
+autocmd! BufRead,BufNewFile *.sass setfiletype sass
 
 " Map ,e and ,v to open files in the same directory as the current file
 cnoremap %% <C-R>=expand('%:h').'/'<cr>
@@ -359,46 +367,6 @@ command! W :w
 
 map <leader>rm :BikeExtract<cr>
 
-function! ExtractVariable()
-    let name = input("Variable name: ")
-    if name == ''
-        return
-    endif
-    " Enter visual mode (not sure why this is needed since we're already in
-    " visual mode anyway)
-    normal! gv
-
-    " Replace selected text with the variable name
-    exec "normal c" . name
-    " Define the variable on the line above
-    exec "normal! O" . name . " = "
-    " Paste the original selected text to be the variable value
-    normal! $p
-endfunction
-
-function! InlineVariable()
-    " Copy the variable under the cursor into the 'a' register
-    " XXX: How do I copy into a variable so I don't pollute the registers?
-    :normal "ayiw
-    " It takes 4 diws to get the variable, equal sign, and surrounding
-    " whitespace. I'm not sure why. diw is different from dw in this respect.
-    :normal 4diw
-    " Delete the expression into the 'b' register
-    :normal "bd$
-    " Delete the remnants of the line
-    :normal dd
-    " Go to the end of the previous line so we can start our search for the
-    " usage of the variable to replace. Doing '0' instead of 'k$' doesn't
-    " work; I'm not sure why.
-    normal k$
-    " Find the next occurence of the variable
-    exec '/\<' . @a . '\>'
-    " Replace that occurence with the text we yanked
-    exec ':.s/\<' . @a . '\>/' . @b
-endfunction
-
-vnoremap <leader>rv :call ExtractVariable()<cr>
-nnoremap <leader>ri :call InlineVariable()<cr>
 " " Find comment
 " map <leader>/# /^ *#<cr>
 " " Find function
@@ -432,23 +400,6 @@ nnoremap <leader>' ""yls<c-r>={'"': "'", "'": '"'}[@"]<cr><esc>
 
 " Map keys to go to specific files
 map <leader>gr :topleft :split config/routes.rb<cr>
-function! ShowRoutes()
-  " Requires 'scratch' plugin
-  :topleft 100 :split __Routes__
-  " Make sure Vim doesn't write __Routes__ as a file
-  :set buftype=nofile
-  " Delete everything
-  :normal 1GdG
-  " Put routes output in buffer
-  :0r! rake -s routes
-  " Size window to number of lines (1 plus rake output length)
-  :exec ":normal " . line("$") . "_ "
-  " Move cursor to bottom
-  :normal 1GG
-  " Delete empty trailing line
-  :normal dd
-endfunction
-map <leader>gR :call ShowRoutes()<cr>
 map <leader>gv :CommandTFlush<cr>\|:CommandT app/views<cr>
 map <leader>gc :CommandTFlush<cr>\|:CommandT app/controllers<cr>
 map <leader>gm :CommandTFlush<cr>\|:CommandT app/models<cr>
@@ -519,9 +470,9 @@ set winwidth=84
 " We have to have a winheight bigger than we want to set winminheight. But if
 " we set winheight to be huge before winminheight, the winminheight set will
 " fail.
-set winheight=5
-set winminheight=5
-set winheight=999
+"set winheight=5
+"set winminheight=5
+"set winheight=999
 
 nnoremap <c-j> <c-w>j
 nnoremap <c-k> <c-w>k
@@ -577,7 +528,7 @@ endfunction
 nnoremap g<c-y> :call ScrollOtherWindowUp(v:count)<cr>
 nnoremap g<c-e> :call ScrollOtherWindowDown(v:count)<cr>
 
-" set shell=bash
+set shell=bash
 
 " Can't be bothered to understand the difference between ESC and <c-c> in
 " insert mode
