@@ -1,4 +1,5 @@
 call pathogen#runtime_append_all_bundles()
+let g:slime_target = "tmux"
 
 " from https://wincent.com/blog/tweaking-command-t-and-vim-for-use-in-the-terminal-and-tmux
 set ttimeoutlen=50
