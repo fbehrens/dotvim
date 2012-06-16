@@ -1,3 +1,4 @@
+call pathogen#infect("~/bundle")
 call pathogen#runtime_append_all_bundles()
 let g:slime_target = "tmux"
 
