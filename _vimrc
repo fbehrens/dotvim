@@ -1,3 +1,5 @@
+" http://brilliantcorners.org/2011/02/building-vim-on-osx-snow-leopard/
+
 call pathogen#infect("~/bundle")
 call pathogen#runtime_append_all_bundles()
 
