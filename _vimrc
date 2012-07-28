@@ -29,7 +29,11 @@ set nocompatible
 " for backgrounded buffers
 set hidden
 
+let mapleader=","
 " Remember more commands and search history
+
+" autocmd BufRead,BufNewFile *.html source ~/.vim/indent/html_grb.vim
+" autocmd FileType htmldjango source ~/.vim/indent/html_grb.vim
 set history=1000
 
 " Make tab completion for files/buffers act like bash
@@ -59,13 +63,6 @@ set showcmd		" display incomplete commands
 
 " For Win32 GUI: remove 't' flag from 'guioptions': no tearoff menu entries
 " let &guioptions = substitute(&guioptions, "t", "", "g")
-
-" Don't use Ex mode, use Q for formatting
-map Q gq
-
-" This is an alternative that also works in block mode, but the deleted
-" text is lost and it only works for putting the current register.
-"vnoremap p "_dp
 
 " Switch syntax highlighting on, when the terminal has colors
 " Also switch on highlighting the last used search pattern.
@@ -108,8 +105,6 @@ else
 
 endif " has("autocmd")
 
-
-" GRB: sane editing configuration"
 set expandtab
 set tabstop=4
 set shiftwidth=4
@@ -165,14 +160,6 @@ if has("gui_running")
     set go-=T
 end
 
-" GRB: add pydoc command
-:command! -nargs=+ Pydoc :call ShowPydoc("<args>")
-function! ShowPydoc(module, ...)
-    let fPath = "/tmp/pyHelp_" . a:module . ".pydoc"
-    :execute ":!pydoc " . a:module . " > " . fPath
-    :execute ":sp ".fPath
-endfunction
-
 " GRB: use emacs-style tab completion when selecting files, etc
 set wildmode=longest,list
 
@@ -207,120 +194,6 @@ function! InsertSnippetWrapper()
     endif
 endfunction
 
-if version >= 700
-    autocmd FileType python set omnifunc=pythoncomplete#Complete
-    let Tlist_Ctags_Cmd='~/bin/ctags'
-endif
-
-function! RunTests(target, args)
-    silent ! echo
-    exec 'silent ! echo -e "\033[1;36mRunning tests in ' . a:target . '\033[0m"'
-    silent w
-    exec "make " . a:target . " " . a:args
-endfunction
-
-function! ClassToFilename(class_name)
-    let understored_class_name = substitute(a:class_name, '\(.\)\(\u\)', '\1_\U\2', 'g')
-    let file_name = substitute(understored_class_name, '\(\u\)', '\L\1', 'g')
-    return file_name
-endfunction
-
-function! ModuleTestPath()
-    let file_path = @%
-    let components = split(file_path, '/')
-    let path_without_extension = substitute(file_path, '\.py$', '', '')
-    let test_path = 'tests/unit/' . path_without_extension
-    return test_path
-endfunction
-
-function! NameOfCurrentClass()
-    let save_cursor = getpos(".")
-    normal $<cr>
-    call PythonDec('class', -1)
-    let line = getline('.')
-    call setpos('.', save_cursor)
-    let match_result = matchlist(line, ' *class \+\(\w\+\)')
-    let class_name = ClassToFilename(match_result[1])
-    return class_name
-endfunction
-
-function! TestFileForCurrentClass()
-    let class_name = NameOfCurrentClass()
-    let test_file_name = ModuleTestPath() . '/test_' . class_name . '.py'
-    return test_file_name
-endfunction
-
-function! TestModuleForCurrentFile()
-    let test_path = ModuleTestPath()
-    let test_module = substitute(test_path, '/', '.', 'g')
-    return test_module
-endfunction
-
-function! RunTestsForFile(args)
-    if @% =~ 'test_'
-        call RunTests('%', a:args)
-    else
-        let test_file_name = TestModuleForCurrentFile()
-        call RunTests(test_file_name, a:args)
-    endif
-endfunction
-
-function! RunAllTests(args)
-    silent ! echo
-    silent ! echo -e "\033[1;36mRunning all unit tests\033[0m"
-    silent w
-    exec "make!" . a:args
-endfunction
-
-function! JumpToError()
-    if getqflist() != []
-        for error in getqflist()
-            if error['valid']
-                break
-            endif
-        endfor
-        let error_message = substitute(error['text'], '^ *', '', 'g')
-        silent cc!
-        exec ":sbuffer " . error['bufnr']
-        call RedBar()
-        echo error_message
-    else
-        call GreenBar()
-        echo "All tests passed"
-    endif
-endfunction
-
-function! RedBar()
-    hi RedBar ctermfg=white ctermbg=red guibg=red
-    echohl RedBar
-    echon repeat(" ",&columns - 1)
-    echohl
-endfunction
-
-function! GreenBar()
-    hi GreenBar ctermfg=white ctermbg=green guibg=green
-    echohl GreenBar
-    echon repeat(" ",&columns - 1)
-    echohl
-endfunction
-
-function! JumpToTestsForClass()
-    exec 'e ' . TestFileForCurrentClass()
-endfunction
-
-let mapleader=","
-" nnoremap <leader>m :call RunTestsForFile('--machine-out')<cr>:redraw<cr>:call JumpToError()<cr>
-" nnoremap <leader>M :call RunTestsForFile('')<cr>
-" nnoremap <leader>a :call RunAllTests('--machine-out')<cr>:redraw<cr>:call JumpToError()<cr>
-" nnoremap <leader>A :call RunAllTests('')<cr>
-
-" nnoremap <leader>a :call RunAllTests('')<cr>:redraw<cr>:call JumpToError()<cr>
-" nnoremap <leader>A :call RunAllTests('')<cr>
-
-" nnoremap <leader>t :call RunAllTests('')<cr>:redraw<cr>:call JumpToError()<cr>
-" nnoremap <leader>T :call RunAllTests('')<cr>
-
-" nnoremap <leader>t :call JumpToTestsForClass()<cr>
 
 " highlight current line
 " set cursorline
@@ -331,22 +204,7 @@ let mapleader=","
 set guioptions-=L
 set guioptions-=r
 
-" Use <c-h> for snippets
-let g:NERDSnippets_key = '<c-h>'
-
-augroup myfiletypes
-  "clear old autocmds in group
-  autocmd!
-  "for ruby, autoindent with two spaces, always expand tabs
-  autocmd FileType ruby,haml,eruby,yaml,html,javascript,sass,cucumber set ai sw=2 sts=2 et
-  autocmd FileType python set sw=4 sts=4 et
-augroup END
-
 set switchbuf=useopen
-
-" autocmd BufRead,BufNewFile *.html source ~/.vim/indent/html_grb.vim
-" autocmd FileType htmldjango source ~/.vim/indent/html_grb.vim
-autocmd! BufRead,BufNewFile *.sass setfiletype sass
 
 " Map ,e and ,v to open files in the same directory as the current file
 cnoremap %% <C-R>=expand('%:h').'/'<cr>
@@ -367,39 +225,23 @@ set number
 set numberwidth=5
 
 if has("gui_running")
-    " source ~/proj/vim-complexity/repo/complexity.vim
 endif
 
-" Seriously, guys. It's not like :W is bound to anything anyway.
-command! W :w
 
-map <leader>rm :BikeExtract<cr>
 
 " " Find comment
-" map <leader>/# /^ *#<cr>
+map <leader>/# /^ *#<cr>
 " " Find function
-" map <leader>/f /^ *def\><cr>
+map <leader>/f /^ *def\><cr>
 " " Find class
-" map <leader>/c /^ *class\><cr>
+map <leader>/c /^ *class\><cr>
 " " Find if
-" map <leader>/i /^ *if\><cr>
-" " Delete function
-" " \%$ means 'end of file' in vim-regex-speak
-" map <leader>df d/\(^ *def\>\)\\|\%$<cr>
-" com! FindLastImport :execute'normal G<CR>' | :execute':normal ?^\(from\|import\)\><CR>'
-" map <leader>/m :FindLastImport<cr>
+map <leader>/i /^ *if\><cr>
 
 command! KillWhitespace :normal :%s/ *$//g<cr><c-o><cr>
 
 " Always show tab bar
-" set showtabline=2
-
-augroup mkd
-    autocmd BufRead *.mkd  set ai formatoptions=tcroqn2 comments=n:&gt;
-    autocmd BufRead *.markdown  set ai formatoptions=tcroqn2 comments=n:&gt;
-augroup END
-
-set makeprg=python\ -m\ nose.core\ --machine-out
+set showtabline=2
 
 map <silent> <leader>y :<C-u>silent '<,'>w !pbcopy<CR>
 
@@ -426,19 +268,24 @@ nnoremap <leader><leader> <c-^>
 " Running tests
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-" vim-makegreen binds itself to ,t unless something else is bound to its
-" function.
-map <leader>\dontstealmymapsmakegreen :w\|:call MakeGreen('spec')<cr>
+map <leader>t :call RunTestFile('')<cr>
+map <leader>T :call RunTestFile(' -n /xxx/')<cr>
+map <leader>a :call RunTests('')<cr>
 
-function! RunTests(filename)
-    " Write the file and run tests for the given filename
-    :w
-    :silent !echo;echo;echo;echo;echo
-    if filereadable("script/test")
-        exec ":!script/test " . a:filename
-    else
-        exec ":!bundle exec rspec " . a:filename
+function! RunTestFile(command_suffix)
+    " Run the tests for the previously-marked file.
+    let in_test_file = match(expand("%"), '\(.feature\|_test.rb\)$') != -1
+    if in_test_file
+        call SetTestFile()
+    elseif !exists("t:grb_test_file")
+        return
     end
+    call RunTests(t:grb_test_file . a:command_suffix)
+endfunction
+
+function! RunNearestTest()
+    let spec_line_number = line('.')
+    call RunTestFile(":" . spec_line_number . " -b")
 endfunction
 
 function! SetTestFile()
@@ -446,33 +293,18 @@ function! SetTestFile()
     let t:grb_test_file=@%
 endfunction
 
-function! RunTestFile(...)
-    if a:0
-        let command_suffix = a:1
+function! RunTests(filename)
+    " Write the file and run tests for the given filename
+    :w
+    if match(a:filename, '\.feature$') != -1
+        exec ":!script/features " . a:filename
+    elseif filereadable("Gemfile")
+        exec ":!ruby -Ilib:test " . a:filename
     else
-        let command_suffix = ""
-    endif
-
-    " Run the tests for the previously-marked file.
-    let in_spec_file = match(expand("%"), '_spec.rb$') != -1
-    if in_spec_file
-        call SetTestFile()
-    elseif !exists("t:grb_test_file")
-        return
+        exec ":!rspec --color " . a:filename
     end
-    call RunTests(t:grb_test_file . command_suffix)
 endfunction
 
-function! RunNearestTest()
-    let spec_line_number = line('.')
-    call RunTestFile(":" . spec_line_number)
-endfunction
-
-" map <leader>t :call RunTestFile()<cr>
-" map <leader>T :call RunNearestTest()<cr>
-" map <leader>a :call RunTests('spec')<cr>
-" map <leader>c :w\|:!cucumber<cr>
-" map <leader>C :w\|:!cucumber --profile wip<cr>
 
 set winwidth=84
 " We have to have a winheight bigger than we want to set winminheight. But if
@@ -488,53 +320,10 @@ nnoremap <c-h> <c-w>h
 nnoremap <c-l> <c-w>l
 nnoremap <c-n> :let &wh = (&wh == 999 ? 10 : 999)<CR><C-W>=
 
-function! ShowColors()
-  let num = 255
-  while num >= 0
-    exec 'hi col_'.num.' ctermbg='.num.' ctermfg=white'
-    exec 'syn match col_'.num.' "ctermbg='.num.':...." containedIn=ALL'
-    call append(0, 'ctermbg='.num.':....')
-    let num = num - 1
-  endwhile
-endfunction
 
 command! -range Md5 :echo system('echo '.shellescape(join(getline(<line1>, <line2>), '\n')) . '| md5')
 
 imap <c-l> <space>=><space>
-
-function! OpenChangedFiles()
-  only " Close all windows, unless they're modified
-  let status = system('git status -s | grep "^ \?\(M\|A\)" | cut -d " " -f 3')
-  let filenames = split(status, "\n")
-  exec "edit " . filenames[0]
-  for filename in filenames[1:]
-    exec "sp " . filename
-  endfor
-endfunction
-command! OpenChangedFiles :call OpenChangedFiles()
-
-if &diff
-  nmap <c-h> :diffget 1<cr>
-  nmap <c-l> :diffget 3<cr>
-  nmap <c-k> [cz.
-  nmap <c-j> ]cz.
-  set nonumber
-endif
-
-" In these functions, we don't use the count argument, but the map referencing
-" v:count seems to make it work. I don't know why.
-function! ScrollOtherWindowDown(count)
-  normal! 
-  normal! 
-  normal! 
-endfunction
-function! ScrollOtherWindowUp(count)
-  normal! 
-  normal! 
-  normal! 
-endfunction
-nnoremap g<c-y> :call ScrollOtherWindowUp(v:count)<cr>
-nnoremap g<c-e> :call ScrollOtherWindowDown(v:count)<cr>
 
 set shell=bash
 
