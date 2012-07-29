@@ -268,41 +268,42 @@ nnoremap <leader><leader> <c-^>
 " Running tests
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-map <leader>t :call RunTestFile('')<cr>
-map <leader>T :call RunTestFile(' -n /xxx/')<cr>
-map <leader>a :call RunTests('')<cr>
+map <leader>t :call RunTestFile( 0 )<CR>
+map <leader>T :call RunTestFile( 1 )<CR>
+map <leader>a :call RunTests('')<CR>
 
-function! RunTestFile(command_suffix)
-    " Run the tests for the previously-marked file.
-    let in_test_file = match(expand("%"), '\(.feature\|_test.rb\)$') != -1
+function! RunTestFile(filter)
+    let in_test_file = match(expand("%"), '_test.rb') != -1
     if in_test_file
         call SetTestFile()
-    elseif !exists("t:grb_test_file")
+    elseif !exists("t:test_file")
         return
     end
-    call RunTests(t:grb_test_file . a:command_suffix)
+    call RunTests(a:filter)
 endfunction
 
-function! RunNearestTest()
-    let spec_line_number = line('.')
-    call RunTestFile(":" . spec_line_number . " -b")
+function! TestFilter()
+  return " '-n /".@t."/'"
 endfunction
 
 function! SetTestFile()
-    " Set the spec file that tests will be run for.
-    let t:grb_test_file=@%
+    let t:test_file=substitute(@%,"\\","/","g")
 endfunction
 
-function! RunTests(filename)
-    " Write the file and run tests for the given filename
+function! RunTests(filter)
     :w
-    if match(a:filename, '\.feature$') != -1
-        exec ":!script/features " . a:filename
-    elseif filereadable("Gemfile")
-        exec ":!ruby -Ilib:test " . a:filename
-    else
-        exec ":!rspec --color " . a:filename
-    end
+    " :silent !echo;echo;echo;echo;echo;echo;echo;echo;echo;echo
+    " :silent !echo;echo;echo;echo;echo;echo;echo;echo;echo;echo
+    " :silent !echo;echo;echo;echo;echo;echo;echo;echo;echo;echo
+    " :silent !echo;echo;echo;echo;echo;echo;echo;echo;echo;echo
+    " :silent !echo;echo;echo;echo;echo;echo;echo;echo;echo;echo
+    " :silent !echo;echo;echo;echo;echo;echo;echo;echo;echo;echo
+    " if match(a:filename, '\.feature$') != -1
+    " elseif filereadable("Gemfile")
+    let s = has("win32") ? "\\;" : ":"
+    let f = a:filter ? TestFilter() : ""
+    let c = ":!ruby -Ilib" . s . "test " . t:test_file . f
+    exec c 
 endfunction
 
 
