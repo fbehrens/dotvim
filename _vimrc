@@ -290,12 +290,21 @@ function! RunTestFile(filter)
     call RunTests(a:filter)
 endfunction
 
-function! TestFilter()
-  return " '-n /".@t."/'"
+function! TestParameter()
+  return " '-n /".TestName()."/'"
 endfunction
 
 function! SetTestFile()
     let t:test_file=substitute(@%,"\\","/","g")
+endfunction
+
+" find testname from "it '#bleeds' do" line
+function! TestName()
+  execute "normal mt"
+  ?\v^\s+it\s
+  let cur_line = getline(".")
+  execute "normal `t"
+  return matchstr(cur_line, '\v^\s+it\W+\zs\w+\ze\W+do$')
 endfunction
 
 function! RunTests(filter)
@@ -309,7 +318,7 @@ function! RunTests(filter)
     " if match(a:filename, '\.feature$') != -1
     " elseif filereadable("Gemfile")
     let s = has("win32") ? "\\;" : ":"
-    let f = a:filter ? TestFilter() : ""
+    let f = a:filter ? TestParameter() : ""
     let c = ":!ruby -Ilib" . s . "test " . t:test_file . f
     exec c 
 endfunction
