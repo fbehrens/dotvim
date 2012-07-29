@@ -50,6 +50,14 @@ set scrolloff=3
 set backupdir=~/.vim-tmp
 set directory=~/.vim-tmp,c:\temp\vim
 
+augroup myfiletypes
+  "clear old autocmds in group
+  autocmd!
+  "for ruby, autoindent with two spaces, always expand tabs
+  autocmd FileType ruby,haml,eruby,yaml,html,javascript,sass,cucumber set ai sw=2 sts=2 et
+  autocmd FileType python set sw=4 sts=4 et
+augroup END
+
 " allow backspacing over everything in insert mode
 set backspace=indent,eol,start
 
