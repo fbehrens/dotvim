@@ -276,53 +276,33 @@ nnoremap <leader><leader> <c-^>
 " Running tests
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-map <leader>t :call RunTestFile( 0 )<CR>
-map <leader>T :call RunTestFile( 1 )<CR>
-map <leader>a :call RunTests('')<CR>
+map <leader>t :call TestFile( 0 )<CR>
+map <leader>T :call TestFile( 1 )<CR>
+map <leader>a :call TestRun()<CR>
 
-function! RunTestFile(filter)
-    let in_test_file = match(expand("%"), '_test.rb') != -1
-    if in_test_file
-        call SetTestFile()
-    elseif !exists("t:test_file")
-        return
-    end
-    call RunTests(a:filter)
+function! TestFile(only_selected)
+    :w
+    let test_file   = substitute(@%,"\\","/","g")
+    let separator   = has("win32") ? "\\;" : ":"
+    let t:test_last = ":!ruby -Ilib" . separator . "test " . test_file 
+    if a:only_selected 
+      let t:test_last = t:test_last . TestExampleParameter()
+    endif
+    call TestRun()
 endfunction
 
-function! TestParameter()
-  return " '-n /".TestName()."/'"
-endfunction
-
-function! SetTestFile()
-    let t:test_file=substitute(@%,"\\","/","g")
+function! TestRun()
+    exec t:test_last
 endfunction
 
 " find testname from "it '#bleeds' do" line
-function! TestName()
+function! TestExampleParameter()
   execute "normal mt"
   ?\v^\s+it\s
   let cur_line = getline(".")
   execute "normal `t"
-  return matchstr(cur_line, '\v^\s+it\W+\zs\w+\ze\W+do$')
+  return " '-n /" . matchstr(cur_line, '\v^\s+it\W+\zs\w+\ze\W+do$') . "/'"
 endfunction
-
-function! RunTests(filter)
-    :w
-    " :silent !echo;echo;echo;echo;echo;echo;echo;echo;echo;echo
-    " :silent !echo;echo;echo;echo;echo;echo;echo;echo;echo;echo
-    " :silent !echo;echo;echo;echo;echo;echo;echo;echo;echo;echo
-    " :silent !echo;echo;echo;echo;echo;echo;echo;echo;echo;echo
-    " :silent !echo;echo;echo;echo;echo;echo;echo;echo;echo;echo
-    " :silent !echo;echo;echo;echo;echo;echo;echo;echo;echo;echo
-    " if match(a:filename, '\.feature$') != -1
-    " elseif filereadable("Gemfile")
-    let s = has("win32") ? "\\;" : ":"
-    let f = a:filter ? TestParameter() : ""
-    let c = ":!ruby -Ilib" . s . "test " . t:test_file . f
-    exec c 
-endfunction
-
 
 set winwidth=84
 " We have to have a winheight bigger than we want to set winminheight. But if
