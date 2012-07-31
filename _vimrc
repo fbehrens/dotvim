@@ -286,7 +286,7 @@ function! TestFile(only_selected)
     let separator   = has("win32") ? "\\;" : ":"
     let t:test_last = ":!ruby -Ilib" . separator . "test " . test_file 
     if a:only_selected 
-      let t:test_last = t:test_last . TestExampleParameter()
+      let t:test_last .= TestExampleParameter()
     endif
     call TestRun()
 endfunction
