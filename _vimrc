@@ -7,6 +7,7 @@ call pathogen#runtime_append_all_bundles()
 let g:slime_target = "tmux"
 
 " http://tbaggery.com/2011/08/08/effortless-ctags-with-git.html
+:nnoremap <f5> :!ctags -R<CR>
 
 " from https://wincent.com/blog/tweaking-command-t-and-vim-for-use-in-the-terminal-and-tmux
 set ttimeoutlen=50
@@ -325,9 +326,29 @@ imap <c-l> <space>=><space>
 
 set shell=bash
 
-" Can't be bothered to understand the difference between ESC and <c-c> in
-" insert mode
-imap <c-c> <esc>
+" creates missing direcories when saving a file
+" from http://www.ibm.com/developerworks/linux/library/l-vim-script-5/index.html
+augroup AutoMkdir
+    autocmd!
+    autocmd  BufNewFile  *  :call EnsureDirExists()
+augroup END
+function! EnsureDirExists ()
+    let required_dir = expand("%:h")
+    if !isdirectory(required_dir)
+        call AskQuit("Directory '" . required_dir . "' doesn't exist.", "&Create it?")
 
-command! InsertTime :normal a<c-r>=strftime('%F %H:%M:%S.0 %z')<cr>
+        try
+            call mkdir( required_dir, 'p' )
+        catch
+            call AskQuit("Can't create '" . required_dir . "'", "&Continue anyway?")
+        endtry
+    endif
+endfunction
+
+function! AskQuit (msg, proposed_action)
+    if confirm(a:msg, a:proposed_action . "\n&Quit?") == 2 
+        exit
+    endif
+endfunction
+
 
