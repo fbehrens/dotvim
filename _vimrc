@@ -3,9 +3,6 @@
 call pathogen#infect("~/bundle")
 call pathogen#runtime_append_all_bundles()
 
-" vim-slime
-let g:slime_target = "tmux"
-
 " http://tbaggery.com/2011/08/08/effortless-ctags-with-git.html
 :nnoremap <f5> :!ctags -R<CR>
 
